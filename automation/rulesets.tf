@@ -23,7 +23,9 @@ resource "github_organization_ruleset" "default_release" {
 
   rules {
     deletion                = true
-    non_fast_forward        = true
+    # We can not enforce linear history on repos that have merge commits in their history.
+    # Enforcing it will block creation of release branches.
+    non_fast_forward        = false
     required_linear_history = true
 
     pull_request {
@@ -36,6 +38,8 @@ resource "github_organization_ruleset" "default_release" {
     }
 
     required_status_checks {
+      do_not_enforce_on_create = true
+
       required_check {
         context        = "DCO"
         integration_id = data.github_app.apps["dco"].id
@@ -43,7 +47,7 @@ resource "github_organization_ruleset" "default_release" {
     }
 
     required_workflows {
-      do_not_enforce_on_create = false
+      do_not_enforce_on_create = true
 
       required_workflow {
         repository_id = module.repositories["community"].repo_id
